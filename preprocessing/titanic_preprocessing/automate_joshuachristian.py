@@ -85,6 +85,9 @@ def encode_sex(df: pd.DataFrame) -> tuple:
     logger.info(f"Encoding Sex: {sex_mapping}")
     return df, sex_mapping
 
+def encode_embarked(df):
+    df = pd.get_dummies(df, columns=['Embarked'], drop_first=True)
+    return df
 
 def handle_outliers_fare(df: pd.DataFrame) -> tuple:
     """
@@ -130,7 +133,6 @@ def save_preprocessing_params(params: dict, output_dir: str) -> None:
         json.dump(clean, f, indent=4)
     logger.info(f"Preprocessing params disimpan: {params_path}")
 
-
 def preprocess(input_path: str, output_path: str) -> pd.DataFrame:
     """
     Pipeline preprocessing lengkap untuk dataset Titanic.
@@ -141,7 +143,7 @@ def preprocess(input_path: str, output_path: str) -> pd.DataFrame:
         3. Tangani missing values (Age, Fare -> median)
         4. Hapus duplikat
         5. Feature engineering (FamilySize)
-        6. Encoding Sex (male=1, female=0)
+        6. Encoding Sex (male=1, female=0) dan embaked
         7. Tangani outlier Fare (IQR clipping)
         8. Standarisasi fitur numerik (Age, Fare, FamilySize)
         9. Simpan hasil + scaler + params
@@ -167,7 +169,7 @@ def preprocess(input_path: str, output_path: str) -> pd.DataFrame:
     df = load_data(input_path)
 
     # Step 2: Drop kolom tidak relevan
-    df = drop_unnecessary_columns(df, ['PassengerId', 'Name', 'Ticket'])
+    df = drop_unnecessary_columns(df, ['PassengerId', 'Name', 'Ticket', 'Cabin'])
 
     # Step 3: Tangani missing values
     df, mv_params = handle_missing_values(df)
@@ -182,6 +184,7 @@ def preprocess(input_path: str, output_path: str) -> pd.DataFrame:
     # Step 6: Encoding Sex
     df, sex_mapping = encode_sex(df)
     all_params['sex_mapping'] = sex_mapping
+    df = encode_embarked(df)
 
     # Step 7: Tangani outlier Fare
     df, outlier_params = handle_outliers_fare(df)
