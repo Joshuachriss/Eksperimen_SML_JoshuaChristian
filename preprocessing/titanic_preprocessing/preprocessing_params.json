@@ -5,7 +5,7 @@
         "male": 1,
         "female": 0
     },
-    "fare_clip_upper": 72.977,
+    "fare_clip_upper": 73.41975000000001,
     "scale_cols": [
         "Age",
         "Fare",
