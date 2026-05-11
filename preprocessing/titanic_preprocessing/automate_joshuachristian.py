@@ -29,6 +29,11 @@ def drop_unnecessary_columns(df: pd.DataFrame, cols: list) -> pd.DataFrame:
     existing = [c for c in cols if c in df.columns]
     df = df.drop(columns=existing)
     logger.info(f"Kolom dihapus: {existing}")
+
+    required_cols = ['Survived', 'Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare']
+    existing_required = [c for c in required_cols if c in df.columns]
+    df = df[existing_required]
+    logger.info(f"Kolom yang digunakan: {df.columns.tolist()}")
     return df
 
 
