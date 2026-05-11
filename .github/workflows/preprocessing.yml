@@ -1,0 +1,55 @@
+name: Auto Preprocessing Pipeline - Titanic
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'titanic_raw/**'
+      - 'preprocessing/titanic_preprocessing/automate_joshuachristian.py'
+  workflow_dispatch:
+
+jobs:
+  preprocessing:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas numpy scikit-learn joblib
+
+      - name: Run Preprocessing Script
+        run: |
+          python preprocessing/titanic_preprocessing/automate_joshuachristian.py
+
+      - name: Verify Output
+        run: |
+          echo "=== Verifikasi Output ==="
+          ls -la preprocessing/titanic_preprocessing/
+          python -c "
+          import pandas as pd
+          df = pd.read_csv('preprocessing/titanic_preprocessing/titanic_preprocessing.csv')
+          print(f'Shape: {df.shape}')
+          print(f'Kolom: {df.columns.tolist()}')
+          print(f'Missing values: {df.isnull().sum().sum()}')
+          print(df.head(3))
+          "
+
+      - name: Commit and Push Preprocessed Data
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions Bot"
+          git add preprocessing/titanic_preprocessing/
+          git diff --staged --quiet || git commit -m "ci: auto-update titanic preprocessed dataset [skip ci]"
+          git push
